@@ -56,7 +56,8 @@ class SignUpSheetController < ApplicationController
     if topic.nil?
       setup_new_topic
     else
-      update_existing_topic topic
+      flash[:error] = "That topic already exists!"
+      redirect_to edit_assignment_path(topic.assignment_id) + "#tabs-2"
     end
   end
 
@@ -222,14 +223,12 @@ class SignUpSheetController < ApplicationController
     redirect_to action: 'list', id: params[:id]
   end
 
-  # routes to new page to specficy student
-  def signup_as_instructor; end
-
+  # controller to sign up a student for a topic from an instructor account
   def signup_as_instructor_action
     user = User.find_by(name: params[:username])
     if user.nil? # validate invalid user
       flash[:error] = "That student does not exist!"
-    else
+    else #If studdent exists then sign up student for topic
       if AssignmentParticipant.exists? user_id: user.id, parent_id: params[:assignment_id]
         if SignUpSheet.signup_team(params[:assignment_id], user.id, params[:topic_id])
           flash[:success] = "You have successfully signed up the student for the topic!"
